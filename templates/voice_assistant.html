@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sesli Asistan</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        #recordBtn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(255, 75, 43, 0.5);
+        }
+
+        #recordBtn:hover {
+            background: linear-gradient(135deg, #ff4b2b, #ff416c);
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(255, 75, 43, 0.7);
+        }
+
+        #responseText {
+            font-weight: bold;
+            font-size: 1rem;
+            min-height: 40px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        #audioPlayer {
+            width: 100%;
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>🎤 Sesli Asistan</h2>
+        <button id="recordBtn">
+            <i class="fas fa-microphone"></i>
+        </button>
+        <p id="responseText">AI Yanıtı bekleniyor...</p>
+        <audio id="audioPlayer" controls></audio>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $("#recordBtn").click(function () {
+                $("#responseText").html("🎙 Dinleniyor...");
+
+                $.ajax({
+                    url: "{% url 'atxaisoft:speech_to_text' %}",
+                    method: "GET",
+                    success: function (data) {
+                        if (data.error) {
+                            $("#responseText").html("❌ Hata: " + data.error);
+                        } else {
+                            $("#responseText").html("✅ AI Yanıtı: " + data.text);
+
+                            // Base64 ses verisini çal
+                            var audioSrc = "data:audio/mp3;base64," + data.audio;
+                            $("#audioPlayer").attr("src", audioSrc).show();
+                            $("#audioPlayer")[0].play();
+                        }
+                    },
+                    error: function () {
+                        $("#responseText").html("⚠️ Bir hata oluştu.");
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
